@@ -4,15 +4,19 @@
 
 using namespace std;
 
+#define POLY_DVBS2   0xd5
+#define POLY_BUYPASS 0x8005
+#define POLY_32Q     0x814141ab
 
 int main(int argc, char** argv)
 {
-  unsigned char test[] = {0x11, 0xc4, 0xcc, 0xac, 0x65, 0xee, 0x45};
+  unsigned char test[] = {0x11, 0xc4, 0xcc, 0xfc};
 
   cout << hex;
-  cout << csum::serialGenCRC<uint32_t>(test, sizeof(test), 0x814141ab) << endl;
+  //Convert the result to size_t, so that uint8_t type will show.
+  cout << size_t(csum::serialGenCRC<32>(test, sizeof(test), POLY_32Q)) << endl;
 
   cout << "LUT CRC:" << endl;
-  csum::CRC<uint32_t> c(0x814141ab);
-  cout << c.gen(test, sizeof(test)) << endl;
+  csum::CRC<32> c(POLY_32Q);
+  cout << size_t(c.gen(test, sizeof(test))) << endl;
 }

@@ -9,15 +9,35 @@
 namespace csum
 {
   typedef uint8_t byte1_t;
+
+  //Type traits converting bit widths to corresponding types
+  //Only available for 8, 16, 32, 64 bits
+  template<size_t W>
+    struct bit_width_trait{};
   
-  template<typename T>
-    T serialGenCRC(const byte1_t* buf, size_t len, const T& poly)
+  template<>
+    struct bit_width_trait<8>{ typedef uint8_t type; };
+
+  template<>
+    struct bit_width_trait<16>{ typedef uint16_t type; };
+  
+  template<>
+    struct bit_width_trait<32>{ typedef uint32_t type; };
+
+  template<>
+    struct bit_width_trait<64>{ typedef uint64_t type; };
+  
+
+  //////////////
+  template<size_t W>
+    typename bit_width_trait<W>::type serialGenCRC(const byte1_t* buf, size_t len,
+					  const typename bit_width_trait<W>::type& poly)
     {
-      T checksum = 0; //current checksum
-      size_t poly_bits = sizeof(T) * 8; //bit width of polynomial
-      size_t bits_to_msb = poly_bits - 8; //a byte need to shift these bits to get to the msb of type T
-      T msb_mask = 1 << (poly_bits - 1); //type T most significant bit mask
-      size_t bit_count = 0; //bit counter
+      typedef typename bit_width_trait<W>::type T;
+      T checksum = 0;
+      size_t bits_to_msb = W - 8;
+      T msb_mask = 1 << (W - 1);
+      size_t bit_count = 0;
       while(len--)
 	{
 	  checksum ^= T(*buf++ << bits_to_msb);
@@ -26,14 +46,18 @@ namespace csum
 	}
       return checksum;
     }
+    
 
-  template<typename T>
+  //Compute CRC with LUT
+  template<size_t W>
     class CRC
     {
+      typedef typename bit_width_trait<W>::type T;
+      
     public:
       CRC(const T&);
       T gen(const byte1_t* buf, size_t len);
-      friend std::ostream& operator<<(std::ostream& os, const CRC<T>& obj)
+      friend std::ostream& operator<<(std::ostream& os, const CRC<W>& obj)
       {
 	//Output hex, with leading zeroes would be best.
 	for(const auto& ele : obj._crc_lut)
@@ -46,19 +70,19 @@ namespace csum
     };
   
   //template class methods' definitions
-  template<typename T>
-    CRC<T>::CRC(const T& poly)
+  template<size_t W>
+    CRC<W>::CRC(const T& poly)
     {
       byte1_t lut_index = 0;
       do
 	{
-	  _crc_lut[lut_index] = serialGenCRC<T>(&lut_index, 1, poly);
+	  _crc_lut[lut_index] = serialGenCRC<W>(&lut_index, 1, poly);
 	  ++lut_index;
 	}while(lut_index != 0); //byte1_t will cycle back to 0
     }
   
-  template<typename T>
-    T CRC<T>::gen(const byte1_t* buf, size_t len)
+  template<size_t W>
+    typename CRC<W>::T CRC<W>::gen(const byte1_t* buf, size_t len)
     {
       T checksum = 0;
       size_t lut_pos = 0;
@@ -75,6 +99,5 @@ namespace csum
     }
 
 }
-
 
 #endif
