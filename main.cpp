@@ -1,5 +1,7 @@
 #include <iostream>
 #include <cstdint>
+#include <vector>
+#include <array>
 #include "crc.h"
 
 using namespace std;
@@ -18,5 +20,6 @@ int main(int argc, char** argv)
 
   cout << "LUT CRC:" << endl;
   csum::CRC<32> c(POLY_32Q);
-  cout << size_t(c.gen(test, sizeof(test))) << endl;
+  array<uint8_t, 4> v_test = {0x11, 0xc4, 0xcc, 0xfc};
+  cout << size_t(c.gen(v_test.begin(), v_test.end())) << endl;
 }

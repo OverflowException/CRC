@@ -5,6 +5,8 @@
 #include <type_traits>
 #include <cstddef>
 #include <ostream>
+#include <algorithm>
+
 
 namespace csum
 {
@@ -27,8 +29,6 @@ namespace csum
   template<>
     struct bit_width_trait<64>{ typedef uint64_t type; };
   
-
-  //////////////
   template<size_t W>
     typename bit_width_trait<W>::type serialGenCRC(const byte1_t* buf, size_t len,
 					  const typename bit_width_trait<W>::type& poly)
@@ -56,7 +56,14 @@ namespace csum
       
     public:
       CRC(const T&);
-      T gen(const byte1_t* buf, size_t len);
+
+      template<typename ForwardIter>
+	T gen(ForwardIter beg, ForwardIter end)
+	{
+	  typedef typename std::iterator_traits<ForwardIter>::value_type val_t;
+	  return _gen(beg, end, val_t());
+	}
+      
       friend std::ostream& operator<<(std::ostream& os, const CRC<W>& obj)
       {
 	//Output hex, with leading zeroes would be best.
@@ -67,6 +74,12 @@ namespace csum
 	
     private:
       std::array<T, 256> _crc_lut;
+
+      template<typename ForwardIter, typename T>
+	T _gen(ForwardIter beg, ForwardIter end, T){ return 0; };
+      
+      template<typename ForwardIter>
+	T _gen(ForwardIter beg, ForwardIter end, uint8_t);
     };
   
   //template class methods' definitions
@@ -82,18 +95,19 @@ namespace csum
     }
   
   template<size_t W>
-    typename CRC<W>::T CRC<W>::gen(const byte1_t* buf, size_t len)
+  template<typename ForwardIter>
+    typename CRC<W>::T CRC<W>::_gen(ForwardIter beg, ForwardIter end, uint8_t)
     {
       T checksum = 0;
       size_t lut_pos = 0;
       size_t poly_bits = sizeof(T) * 8;
       size_t bits_to_lsb = poly_bits - 8;
-      
-      while(len--)
-	{
-	  lut_pos = (checksum >> bits_to_lsb) ^ *buf++;
-	  checksum = (checksum << 8) ^ _crc_lut[lut_pos];
-	}
+
+      for(; beg != end; ++beg)
+  	{
+  	  lut_pos = (checksum >> bits_to_lsb) ^ *beg;
+  	  checksum = (checksum << 8) ^ _crc_lut[lut_pos];
+  	}
       
       return checksum;
     }
