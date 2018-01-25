@@ -60,6 +60,8 @@ namespace csum
       template<typename ForwardIter>
 	T gen(ForwardIter beg, ForwardIter end)
 	{
+	  //Generalize. Check value_type.
+	  //An iterator trait is used to obtain iterator type info
 	  typedef typename std::iterator_traits<ForwardIter>::value_type val_t;
 	  return _gen(beg, end, val_t());
 	}
@@ -75,9 +77,12 @@ namespace csum
     private:
       std::array<T, 256> _crc_lut;
 
+      //If value_type is any data type that is not 1 byte in size, return 0;
       template<typename ForwardIter, typename T>
 	T _gen(ForwardIter beg, ForwardIter end, T){ return 0; };
-      
+
+      //If value_type is 1 byte in size, calculate.
+      //This is not a partial specification. Simple overide.
       template<typename ForwardIter>
 	T _gen(ForwardIter beg, ForwardIter end, uint8_t);
     };
@@ -93,7 +98,8 @@ namespace csum
 	  ++lut_index;
 	}while(lut_index != 0); //byte1_t will cycle back to 0
     }
-  
+
+  //Notice how to write the definition of a template member function of a template class.
   template<size_t W>
   template<typename ForwardIter>
     typename CRC<W>::T CRC<W>::_gen(ForwardIter beg, ForwardIter end, uint8_t)
