@@ -106,8 +106,7 @@ namespace csum
     {
       T checksum = 0;
       size_t lut_pos = 0;
-      size_t poly_bits = sizeof(T) * 8;
-      size_t bits_to_lsb = poly_bits - 8;
+      size_t bits_to_lsb = W - 8;
 
       for(; beg != end; ++beg)
   	{

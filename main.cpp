@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <vector>
 #include <array>
+#include <list>
 #include "crc.h"
 
 using namespace std;
@@ -12,7 +13,7 @@ using namespace std;
 
 int main(int argc, char** argv)
 {
-  unsigned char test[] = {0x11, 0xc4, 0xcc, 0xfc};
+  unsigned char test[] = {0x11, 0xc4, 0xcc};
 
   cout << hex;
   //Convert the result to size_t, so that uint8_t type will show.
@@ -20,6 +21,6 @@ int main(int argc, char** argv)
 
   cout << "LUT CRC:" << endl;
   csum::CRC<32> c(POLY_32Q);
-  array<uint8_t, 4> v_test = {0x11, 0xc4, 0xcc, 0xfc};
-  cout << size_t(c.gen(v_test.begin(), v_test.end())) << endl;
+  list<unsigned char> container_test = {0x11, 0xc4, 0xcc};
+  cout << size_t(c.gen(container_test.begin(), container_test.end())) << endl;
 }
