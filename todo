@@ -1,7 +1,2 @@
-0. static_cast? reinterpret_cast? Why does casting void* does not need reinterpret_cast? why does converting "uint16_t*" to "unsigned char*" needs reinterpret_cast?
-0. read https://stackoverflow.com/questions/4660123/overloading-friend-operator-for-template-class about overloading operator << in a template class
-1. Implement CRC checksum with LUT
-2. Add template parameter check to to this implementation
-3. Do not use data type as template parameter. Use CRC length. 8, 16, 32 ,etc.
-4. Check these parameters. Handle invalid parameter.
-5. Read svpng.inc from Milo Yip
+1. static_cast? reinterpret_cast? Why does casting void* does not need reinterpret_cast? why does converting "uint16_t*" to "unsigned char*" needs reinterpret_cast?
+2. std::string container does not work
